@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Add New Historic Site</title>
+</head>
+
+<body>
+  <nav>
+    <a href="/">Home</a> |
+    <a href="/sites">All Sites</a> |
+    <a href="/items/add" class="active">Add Item</a>
+  </nav>
+
+  <h2>Add New Historic Site</h2>
+  <form action="/items/add" method="POST" enctype="multipart/form-data">
+    <label>Site Name:</label>
+    <input type="text" name="site" required><br>
+
+    <label>Description:</label>
+    <textarea name="description" required></textarea><br>
+
+    <label>Location:</label>
+    <input type="text" name="location" required><br>
+
+    <label>Province Code (如: ON, BC):</label>
+    <input type="text" name="provinceOrTerritoryCode" required><br>
+
+    <label>Feature Image:</label>
+    <input type="file" name="featureImage"><br>
+
+    <label>Post Date:</label>
+    <input type="date" name="postDate" required><br>
+
+    <label>Published:</label>
+    <input type="checkbox" name="published"><br>
+
+    <button type="submit">Add Item</button>
+  </form>
+</body>
+
+</html>
