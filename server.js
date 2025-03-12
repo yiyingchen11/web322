@@ -12,7 +12,6 @@
 * Name: Yiying Chen       Student ID: 145556221    Date: 2025.02.19
 ********************************************************************************/
 
-const fs = require('fs');
 const express = require('express');
 const path = require('path');
 const multer = require("multer");
@@ -23,7 +22,16 @@ const siteData = require("./modules/data-service");
 const app = express();
 const PORT = 8080;
 
-// Cloudinary 
+// Configure EJS as the view engine.
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.use(express.static(path.join(__dirname, "public")));
+
+// Parsing static resources (e.g. CSS, JS, images).
+app.use(express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded({ extended: true }));
+
+// Configure Cloudinary.
 cloudinary.config({
   cloud_name: 'Cloud Name',
   api_key: 'API Key',
@@ -32,48 +40,64 @@ cloudinary.config({
 });
 
 const upload = multer();
-app.use(express.urlencoded({ extended: true }));
 
-// Initialize the data before starting the server
+//  Initialize the data.
 siteData.initialize()
   .then(() => {
     console.log("Data initialized successfully");
 
-
+    // Home
     app.get("/", (req, res) => {
-      res.send("Assignment 3: Yiying Chen - 145556221");
+      res.render("home");
+    });
+    //  About 
+    app.get("/about", (req, res) => {
+      res.render("about", { page: "/about" });
     });
 
-    // Get all sites or filter by query parameters
+
+    // Show all sites.
     app.get("/sites", (req, res) => {
-      if (req.query.category) {
-        siteData.getSitesByProvinceOrTerritoryName(req.query.category)
-          .then(data => res.json(data))
-          .catch(err => res.status(404).send(err));
-      } else if (req.query.minDate) {
-        siteData.getSitesByMinDate(req.query.minDate)
-          .then(data => res.json(data))
-          .catch(err => res.status(404).send(err));
-      } else {
-        siteData.getAllSites()
-          .then(data => res.json(data))
-          .catch(err => res.status(404).send(err));
-      }
+      siteData.getAllSites()
+        .then(sites => {
+          let filteredSites = sites;
+
+          // Handles region filtering.
+          if (req.query.region) {
+            filteredSites = sites.filter(site =>
+              site.provinceOrTerritoryObj.region.toLowerCase().trim() === req.query.region.toLowerCase().trim()
+            );
+            if (filteredSites.length === 0) {
+              return res.status(404).render("404", { message: `No sites found in region: ${req.query.region}` });
+            }
+          }
+
+          // Handles provinceOrTerritory filtering.
+          if (req.query.provinceOrTerritory) {
+            filteredSites = filteredSites.filter(site => site.provinceOrTerritoryObj.name === req.query.provinceOrTerritory);
+            if (filteredSites.length === 0) {
+              return res.status(404).render("404", { message: `No sites found in province/territory: ${req.query.provinceOrTerritory}` });
+            }
+          }
+
+          res.render("sites", { sites: filteredSites });
+        })
+        .catch(err => res.status(500).render("404", { message: "Error retrieving site data." }));
     });
 
-    // Individual Sites by ID
+    // Site Details.
     app.get("/item/:id", (req, res) => {
       siteData.getSiteById(req.params.id)
-        .then(data => res.json(data))
-        .catch(err => res.status(404).send(err));
+        .then(data => res.render("site", { site: data }))
+        .catch(err => res.status(404).render("404", { message: "Site not found." }));
     });
 
-    // Display the Add Item page
+    //  The Add Site screen is displayed.
     app.get("/items/add", (req, res) => {
-      res.sendFile(path.join(__dirname, "/views/addItem.html"));
+      res.render("addItem");
     });
 
-    // Handling requests to add items
+    // Processing of additional sites.
     app.post("/items/add", upload.single("featureImage"), (req, res) => {
       if (req.file) {
         let streamUpload = (req) => {
@@ -109,9 +133,14 @@ siteData.initialize()
       }
     });
 
-    // Start the server
+    //404 Page
+    app.use((req, res) => {
+      res.status(404).render("404", { message: "Page not found." });
+    });
+
+    // Start the server.
     app.listen(PORT, () => {
-      console.log(`Server is running on http: http://localhost:${PORT}`);
+      console.log(`Server is running on http://localhost:${PORT}`);
     });
   })
   .catch(err => {

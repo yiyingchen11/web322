@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add New Historic Site</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+  <!-- Navigation -->
+  <%- include('partials/navbar', { page: '/items/add' }) %>
+
+    <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6 mt-10">
+      <h2 class="text-2xl font-bold text-center mb-4">Add New Historic Site</h2>
+
+      <form action="/items/add" method="POST" enctype="multipart/form-data" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Site Name:</label>
+          <input type="text" name="site" required class="mt-1 p-2 w-full border rounded-md">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Description:</label>
+          <textarea name="description" required class="mt-1 p-2 w-full border rounded-md"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Location:</label>
+          <input type="text" name="location" required class="mt-1 p-2 w-full border rounded-md">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Province Code (e.g. ON, BC):</label>
+          <input type="text" name="provinceOrTerritoryCode" required class="mt-1 p-2 w-full border rounded-md">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Feature Image:</label>
+          <input type="file" name="featureImage" class="mt-1 p-2 w-full border rounded-md">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Post Date:</label>
+          <input type="date" name="postDate" required class="mt-1 p-2 w-full border rounded-md">
+        </div>
+
+        <div class="flex items-center">
+          <input type="checkbox" name="published" id="published"
+            class="h-4 w-4 text-violet-600 focus:ring-violet-500 border-gray-300 rounded">
+          <label for="published" class="ml-2 block text-sm text-gray-900">Published</label>
+        </div>
+
+        <button type="submit" class="w-full bg-violet-600 text-white py-2 px-4 rounded-md hover:bg-violet-700">
+          Add Item
+        </button>
+      </form>
+    </div>
+</body>
+
+</html>

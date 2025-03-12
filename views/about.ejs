@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+  <!-- Navigation -->
+  <%- include('partials/navbar', { page: '/about' }) %>
+
+    <div class="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6 mt-10">
+      <h2 class="text-3xl font-bold text-center mb-4">About This Project</h2>
+      <p class="text-gray-700 text-center">
+        Showcasing Canada's historical sites so that people can explore and learn more.
+        By dividing it into four sections - Central Canada, Atlantic Region,
+        Prairie Provinces and West Coast - it makes it easier for people to search.
+      </p>
+
+      <!-- Introduce yourself-->
+      <div class="mt-10 text-center">
+        <h3 class="text-2xl font-semibold">About Me</h3>
+        <img src="/images/photo.jpg" alt="Your Photo" class="w-32 h-32 rounded-full mx-auto mt-4 shadow-md">
+        <p class="mt-4 text-lg font-bold">Yiying Chen</p>
+        <p class="text-gray-700">Student</p>
+        <p class="text-gray-600 mt-2">
+          My name is Yiying Chen, I am 22 years old and Iam a student at Seneca college web322. My favorite colors are
+          black white and purple. My hobby is cooking.
+        </p>
+
+        <div class="mt-6">
+          <a href="https://github.com/yiyingchen11/web322" target="_blank"
+            class="px-4 py-2 bg-violet-500 text-white rounded-md hover:bg-violet-600">
+            GitHub Profile
+          </a>
+        </div>
+      </div>
+    </div>
+</body>
+
+</html>

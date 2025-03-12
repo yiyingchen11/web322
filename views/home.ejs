@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home - Historic Sites</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+  <!-- Navigation -->
+  <%- include('partials/navbar', { page: '/' }) %>
+
+    <section class="hero bg-violet-600 text-white text-center py-20">
+      <div class="max-w-4xl mx-auto">
+        <h1 class="text-5xl font-bold">Welcome to the Historic Sites App</h1>
+        <p class="text-lg mt-4">Explore Canada's rich history through its heritage sites.</p>
+        <a href="/sites" class="mt-6 inline-block px-6 py-3 bg-white text-violet-600 rounded-lg font-semibold">
+          View Historic Sites
+        </a>
+      </div>
+    </section>
+</body>
+
+</html>

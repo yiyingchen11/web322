@@ -1,0 +1,57 @@
+<nav class="bg-violet-600 p-4 shadow-md">
+  <div class="max-w-6xl mx-auto flex justify-between items-center">
+    <!--  Logo -->
+    <a href="/" class="text-white text-xl font-bold">Historic Sites</a>
+
+    <!-- Navigation menu. -->
+    <ul class="hidden md:flex space-x-6">
+      <li>
+        <a href="/" class="text-white px-3 py-2 rounded-md 
+          <%= (page === '/') ? 'bg-violet-800' : 'hover:bg-violet-700' %>">
+          Home
+        </a>
+      </li>
+      <li>
+        <a href="/sites" class="text-white px-3 py-2 rounded-md 
+          <%= (page === '/sites') ? 'bg-violet-800' : 'hover:bg-violet-700' %>">
+          View Site Collection
+        </a>
+      </li>
+      <li>
+        <a href="/about" class="text-white px-3 py-2 rounded-md 
+          <%= (page === '/about') ? 'bg-violet-800' : 'hover:bg-violet-700' %>">
+          About
+        </a>
+      </li>
+      <li>
+        <a href="/items/add" class="text-white px-3 py-2 rounded-md 
+          <%= (page === '/items/add') ? 'bg-violet-800' : 'hover:bg-violet-700' %>">
+          Add Item
+        </a>
+      </li>
+    </ul>
+
+    <!-- Menu -->
+    <div class="md:hidden">
+      <button id="menu-toggle" class="text-white focus:outline-none">
+        ☰
+      </button>
+    </div>
+  </div>
+
+  <!-- Dropdown Menu -->
+  <ul id="mobile-menu" class="hidden md:hidden bg-violet-700 p-4 space-y-2">
+    <li><a href="/home" class="block text-white py-2 px-4 hover:bg-violet-800">Home</a></li>
+    <li><a href="/sites" class="block text-white py-2 px-4 hover:bg-violet-800">View Site Collection</a></li>
+    <li><a href="/about" class="block text-white py-2 px-4 hover:bg-violet-800">About</a></li>
+    <li><a href="/items/add" class="block text-white py-2 px-4 hover:bg-violet-800">Add Item</a></li>
+  </ul>
+</nav>
+
+<!--  Controls the menu. -->
+<script>
+  document.getElementById("menu-toggle").addEventListener("click", function () {
+    var menu = document.getElementById("mobile-menu");
+    menu.classList.toggle("hidden");
+  });
+</script>

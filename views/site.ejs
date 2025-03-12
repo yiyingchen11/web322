@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>
+    <%= site.site %> - Historic Site
+  </title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+  <!-- Navigation -->
+  <%- include('partials/navbar', { page: '' }) %>
+
+    <div class="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6 mt-10">
+      <h1 class="text-3xl font-bold text-center">
+        <%= site.site %>
+      </h1>
+      <p class="text-center text-gray-600 mt-2">Below, you will find detailed information about the site.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <!-- Left: Site image-->
+        <div class="flex justify-center">
+          <img src="<%= site.image %>" alt="Site Image" class="w-80 h-80 rounded-md">
+        </div>
+
+        <!-- Right: Site information  -->
+        <div class="space-y-3">
+          <p><strong>Site Name:</strong>
+            <%= site.site %>
+          </p>
+          <p><strong>Date:</strong>
+            <%= site.date %> (<%= site.dateType %>)
+          </p>
+          <p><strong>Designated:</strong>
+            <%= site.designated %>
+          </p>
+          <p><strong>Location:</strong>
+            <%= site.location %>,
+              <a href="/sites?provinceOrTerritory=<%= site.provinceOrTerritoryObj.name %>"
+                class="text-violet-600 underline">
+                <%= site.provinceOrTerritoryObj.name %>
+              </a>
+          </p>
+          <p><strong>Region:</strong>
+            <a href="/sites?region=<%= site.region %>" class="text-violet-600 underline">
+              <%= site.region %>
+            </a>
+          </p>
+          <p><strong>Geolocation:</strong>
+            <%= site.latitude %>, <%= site.longitude %>
+          </p>
+
+          <!-- Random quote -->
+          <div class="bg-gray-200 p-4 rounded-md mt-4">
+            <p class="italic text-gray-700" id="quote">Loading quote...</p>
+            <p class="text-right text-sm font-semibold" id="author"></p>
+          </div>
+        </div>
+      </div>
+
+      <!--Back button-->
+      <div class="mt-6 text-center">
+        <button onclick="history.back()" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">
+          ← Go Back
+        </button>
+      </div>
+    </div>
+
+    <!-- Get Random quote -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch("https://api.quotable.io/random")
+          .then(response => response.json())
+          .then(data => {
+            document.getElementById("quote").textContent = `"${data.content}"`;
+            document.getElementById("author").textContent = `- ${data.author}`;
+          })
+          .catch(error => {
+            document.getElementById("quote").textContent = "Failed to load quote.";
+          });
+      });
+    </script>
+
+</body>
+
+</html>
