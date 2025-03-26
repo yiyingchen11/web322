@@ -1,71 +1,122 @@
-const siteData = require("../data/NHSiteData.json");
-const provinceAndTerritoryData = require("../data/provinceAndTerritoryData.json");
 
-let sites = [];
+require('dotenv').config();
+const { Sequelize, DataTypes, Op } = require('sequelize');
+const provinceAndTerritoryData = require('../data/provinceAndTerritoryData.json');
+const siteData = require('../data/NHSiteData.json');
 
-// Initialize function
+// Create Sequelize 
+const sequelize = new Sequelize(
+  process.env.DB_DATABASE,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    dialect: 'postgres',
+    port: 5432,
+    dialectOptions: {
+      ssl: { rejectUnauthorized: false },
+    },
+    logging: false
+  }
+);
+
+// Define the model
+const ProvinceOrTerritory = sequelize.define('ProvinceOrTerritory', {
+  code: { type: DataTypes.STRING, primaryKey: true },
+  name: DataTypes.STRING,
+  type: DataTypes.STRING,
+  region: DataTypes.STRING,
+  capital: DataTypes.STRING
+}, { timestamps: false });
+
+const Site = sequelize.define('Site', {
+  siteId: { type: DataTypes.STRING, primaryKey: true },
+  site: DataTypes.STRING,
+  description: DataTypes.TEXT,
+  date: DataTypes.INTEGER,
+  dateType: DataTypes.STRING,
+  image: DataTypes.STRING,
+  location: DataTypes.STRING,
+  latitude: DataTypes.FLOAT,
+  longitude: DataTypes.FLOAT,
+  designated: DataTypes.INTEGER,
+  provinceOrTerritoryCode: DataTypes.STRING
+}, { timestamps: false });
+
+// correlation model
+Site.belongsTo(ProvinceOrTerritory, { foreignKey: 'provinceOrTerritoryCode' });
+
+// Initialize database (synchronize model structure)
 function initialize() {
-  return new Promise((resolve, reject) => {
-    try {
-      sites = siteData.map(site => {
-        let provinceObj = provinceAndTerritoryData.find(province => province.code === site.provinceOrTerritoryCode);
-        return { ...site, provinceOrTerritoryObj: provinceObj };
-      });
-      resolve();
-    } catch (error) {
-      reject("Failed to initialize site data.");
-    }
-  });
+  return sequelize.sync();
 }
 
 // Get all sites
 function getAllSites() {
-  return new Promise((resolve, reject) => {
-    sites.length > 0 ? resolve(sites) : reject("No sites available.");
-  });
+  return Site.findAll({ include: [ProvinceOrTerritory] });
 }
 
-// Get site by ID
+// Access to all areas
+function getAllProvincesAndTerritories() {
+  return ProvinceOrTerritory.findAll();
+}
+
+// Get individual sites by ID
 function getSiteById(id) {
-  return new Promise((resolve, reject) => {
-    const site = sites.find(site => site.siteId === id);
-    site ? resolve(site) : reject(`Unable to find site with ID: ${id}`);
+  return Site.findOne({
+    where: { siteId: id },
+    include: [ProvinceOrTerritory]
   });
 }
 
-// Get sites by province or territory name 
+// Search by area name
 function getSitesByProvinceOrTerritoryName(name) {
-  return new Promise((resolve, reject) => {
-    const filteredSites = sites.filter(site =>
-      site.provinceOrTerritoryObj.name.toLowerCase().includes(name.toLowerCase())
-    );
-    filteredSites.length > 0 ? resolve(filteredSites) : reject(`No sites found in province/territory matching: ${name}`);
+  return Site.findAll({
+    include: {
+      model: ProvinceOrTerritory,
+      where: {
+        name: { [Op.iLike]: `%${name}%` }
+      }
+    }
   });
 }
 
-// Filtering sites by date
-function getSitesByMinDate(minDateStr) {
-  return new Promise((resolve, reject) => {
-    const filtered = sites.filter(site => new Date(site.postDate) >= new Date(minDateStr));
-    filtered.length > 0 ? resolve(filtered) : reject("No matching date results found.");
+// Search by area name
+function getSitesByRegion(region) {
+  return Site.findAll({
+    include: {
+      model: ProvinceOrTerritory,
+      where: {
+        region: { [Op.iLike]: `%${region}%` }
+      }
+    }
   });
 }
 
-// Addition  new sites
-function addItem(itemData) {
-  return new Promise((resolve, reject) => {
-    itemData.published = itemData.published ? true : false;
-    itemData.siteId = `NEW${sites.length + 1}`;
-    sites.push(itemData);
-    resolve(itemData);
-  });
+// Add new site
+function addSite(siteData) {
+  return Site.create(siteData);
 }
 
+// Edit existing site
+function editSite(id, siteData) {
+  return Site.update(siteData, { where: { siteId: id } });
+}
+
+// Delete site
+function deleteSite(id) {
+  return Site.destroy({ where: { siteId: id } });
+}
+
+// Export all functions
 module.exports = {
   initialize,
   getAllSites,
   getSiteById,
   getSitesByProvinceOrTerritoryName,
-  getSitesByMinDate,
-  addItem
+  getSitesByRegion,
+  getAllProvincesAndTerritories,
+  addSite,
+  editSite,
+  deleteSite
 };

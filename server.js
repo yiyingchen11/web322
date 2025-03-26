@@ -1,17 +1,3 @@
-/*********************************************************************************
-* WEB322 – Assignment 1
-* I declare that this assignment is my own work in accordance with Seneca Academic Policy.
-* No part of this assignment has been copied manually or electronically from any other source
-* (including web sites) or distributed to other students.
-*
-* Name: __Yiying Chen____________________ Student ID: ____145556221______________ Date: ____2025.02.19________________
-*
-********************************************************************************/
-/*********************************************************************************
-* WEB322 – Assignment 3
-* Name: Yiying Chen       Student ID: 145556221    Date: 2025.02.19
-********************************************************************************/
-
 const express = require('express');
 const path = require('path');
 const multer = require("multer");
@@ -22,127 +8,187 @@ const siteData = require("./modules/data-service");
 const app = express();
 const PORT = 8080;
 
-// Configure EJS as the view engine.
+// EJS 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(express.static(path.join(__dirname, "public")));
 
-// Parsing static resources (e.g. CSS, JS, images).
+// Static Resources and Forms Parsing
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 
-// Configure Cloudinary.
+// Cloudinary 
 cloudinary.config({
-  cloud_name: 'Cloud Name',
-  api_key: 'API Key',
-  api_secret: 'API Secret',
+  cloud_name: 'dsmhfiuer',
+  api_key: '835383986911247',
+  api_secret: 'IKkMRuZjj-it7PO67cAv7AJbLpc',
   secure: true
 });
 
 const upload = multer();
 
-//  Initialize the data.
-siteData.initialize()
-  .then(() => {
-    console.log("Data initialized successfully");
+// Start the service after initializing the database
+siteData.initialize().then(() => {
+  console.log(" The data is initialized.");
 
-    // Home
-    app.get("/", (req, res) => {
-      res.render("home");
-    });
-    //  About 
-    app.get("/about", (req, res) => {
-      res.render("about", { page: "/about" });
-    });
+  // Home
+  app.get("/", (req, res) => {
+    res.render("home");
+  });
 
+  // About Page
+  app.get("/about", (req, res) => {
+    res.render("about", { page: "/about" });
+  });
 
-    // Show all sites.
-    app.get("/sites", (req, res) => {
+  // All sites
+  app.get("/sites", (req, res) => {
+    if (req.query.province) {
+      siteData.getSitesByProvinceOrTerritoryName(req.query.province)
+        .then(sites => res.render("sites", { sites, page: "/sites" }))
+        .catch(() => res.render("sites", { sites: [], page: "/sites", message: "No results." }));
+    } else if (req.query.region) {
+      siteData.getSitesByRegion(req.query.region)
+        .then(sites => res.render("sites", { sites, page: "/sites" }))
+        .catch(() => res.render("sites", { sites: [], page: "/sites", message: "No results." }));
+    } else {
       siteData.getAllSites()
-        .then(sites => {
-          let filteredSites = sites;
+        .then(sites => res.render("sites", { sites, page: "/sites" }))
+        .catch(() => res.render("sites", { sites: [], page: "/sites", message: "No results." }));
+    }
+  });
 
-          // Handles region filtering.
-          if (req.query.region) {
-            filteredSites = sites.filter(site =>
-              site.provinceOrTerritoryObj.region.toLowerCase().trim() === req.query.region.toLowerCase().trim()
-            );
-            if (filteredSites.length === 0) {
-              return res.status(404).render("404", { message: `No sites found in region: ${req.query.region}` });
-            }
-          }
+  // Individual site detail pages
+  app.get("/site/:id", (req, res) => {
+    siteData.getSiteById(req.params.id)
+      .then(site => {
+        if (site) {
+          res.render("site", { site, page: "/sites" });
+        } else {
+          res.status(404).render("404", { message: "Site not found." });
+        }
+      })
+      .catch(() => res.status(500).render("500"));
+  });
 
-          // Handles provinceOrTerritory filtering.
-          if (req.query.provinceOrTerritory) {
-            filteredSites = filteredSites.filter(site => site.provinceOrTerritoryObj.name === req.query.provinceOrTerritory);
-            if (filteredSites.length === 0) {
-              return res.status(404).render("404", { message: `No sites found in province/territory: ${req.query.provinceOrTerritory}` });
-            }
-          }
+  // Add site form page
+  app.get("/items/add", (req, res) => {
+    siteData.getAllProvincesAndTerritories()
+      .then(provinces => res.render("addItem", { provinces }))
+      .catch(() => res.render("500"));
+  });
 
-          res.render("sites", { sites: filteredSites });
-        })
-        .catch(err => res.status(500).render("404", { message: "Error retrieving site data." }));
-    });
+  // Add site submission processing
+  app.post("/items/add", upload.single("image"), async (req, res) => {
+    try {
+      let imageUrl = "";
 
-    // Site Details.
-    app.get("/item/:id", (req, res) => {
-      siteData.getSiteById(req.params.id)
-        .then(data => res.render("site", { site: data }))
-        .catch(err => res.status(404).render("404", { message: "Site not found." }));
-    });
-
-    //  The Add Site screen is displayed.
-    app.get("/items/add", (req, res) => {
-      res.render("addItem");
-    });
-
-    // Processing of additional sites.
-    app.post("/items/add", upload.single("featureImage"), (req, res) => {
       if (req.file) {
-        let streamUpload = (req) => {
+        const streamUpload = (req) => {
           return new Promise((resolve, reject) => {
-            let stream = cloudinary.uploader.upload_stream((error, result) => {
-              if (result) {
-                resolve(result);
-              } else {
-                reject(error);
-              }
+            const stream = cloudinary.uploader.upload_stream((error, result) => {
+              if (result) resolve(result);
+              else reject(error);
             });
             streamifier.createReadStream(req.file.buffer).pipe(stream);
           });
         };
-
-        async function upload(req) {
-          let result = await streamUpload(req);
-          return result;
-        }
-
-        upload(req).then((uploaded) => {
-          processItem(uploaded.url);
-        });
-      } else {
-        processItem("");
+        const uploaded = await streamUpload(req);
+        imageUrl = uploaded.url;
       }
 
-      function processItem(imageUrl) {
-        req.body.featureImage = imageUrl;
-        siteData.addItem(req.body).then(() => {
-          res.redirect("/sites");
-        });
-      }
-    });
+      const newSite = {
+        siteId: req.body.siteId,
+        site: req.body.site,
+        description: req.body.description,
+        date: req.body.date,
+        dateType: req.body.dateType,
+        image: imageUrl,
+        location: req.body.location,
+        latitude: req.body.latitude,
+        longitude: req.body.longitude,
+        designated: req.body.designated,
+        provinceOrTerritoryCode: req.body.provinceOrTerritoryCode
+      };
 
-    //404 Page
-    app.use((req, res) => {
-      res.status(404).render("404", { message: "Page not found." });
-    });
+      await siteData.addSite(newSite);
+      res.redirect("/sites");
 
-    // Start the server.
-    app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.error("Error initializing data:", err);
+    } catch (err) {
+      res.status(500).render("500", { message: "Failed to add site." });
+    }
   });
+
+  // Edit Site - Show Forms
+  app.get("/editSite/:id", async (req, res) => {
+    try {
+      const site = await siteData.getSiteById(req.params.id);
+      const provinces = await siteData.getAllProvincesAndTerritories();
+      res.render("editSite", { site, provinces });
+    } catch (err) {
+      res.status(500).render("500", { message: "Failed to load edit form." });
+    }
+  });
+
+  // Edit Site - Submission Processing
+  app.post("/editSite", upload.single("image"), async (req, res) => {
+    try {
+      let imageUrl = req.body.currentImage;
+
+      if (req.file) {
+        const streamUpload = (req) => {
+          return new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream((error, result) => {
+              if (result) resolve(result);
+              else reject(error);
+            });
+            streamifier.createReadStream(req.file.buffer).pipe(stream);
+          });
+        };
+        const uploaded = await streamUpload(req);
+        imageUrl = uploaded.url;
+      }
+
+      const updatedSite = {
+        site: req.body.site,
+        description: req.body.description,
+        date: req.body.date,
+        dateType: req.body.dateType,
+        image: imageUrl,
+        location: req.body.location,
+        latitude: req.body.latitude,
+        longitude: req.body.longitude,
+        designated: req.body.designated,
+        provinceOrTerritoryCode: req.body.provinceOrTerritoryCode
+      };
+
+      await siteData.editSite(req.body.siteId, updatedSite);
+      res.redirect("/sites");
+
+    } catch (err) {
+      res.status(500).render("500", { message: "Failed to update site." });
+    }
+  });
+
+  // Delete site
+  app.get("/deleteSite/:id", async (req, res) => {
+    try {
+      await siteData.deleteSite(req.params.id);
+      res.redirect("/sites");
+    } catch (err) {
+      res.status(500).render("500", { message: "Failed to delete site." });
+    }
+  });
+
+  // 404 
+  app.use((req, res) => {
+    res.status(404).render("404", { message: "Page not found." });
+  });
+
+  // Start the server.
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
+
+}).catch(err => {
+  console.error(" Initialization failed:", err);
+});

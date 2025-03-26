@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Historic Site</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+  <%- include('partials/navbar', { page: '/sites' }) %>
+
+    <div class="max-w-3xl mx-auto mt-10 bg-white p-6 rounded-xl shadow-md">
+      <h1 class="text-2xl font-bold mb-6 text-center">Edit Historic Site</h1>
+
+      <form action="/editSite" method="POST" enctype="multipart/form-data" class="space-y-4">
+
+        <!-- siteId (read-only) -->
+        <div>
+          <label class="block font-semibold">Site ID (Read-Only)</label>
+          <input type="text" name="siteId" value="<%= site.siteId %>" readonly
+            class="w-full p-2 border rounded bg-gray-100 text-gray-600" />
+        </div>
+
+        <!-- Site Name -->
+        <div>
+          <label class="block font-semibold">Site Name</label>
+          <input type="text" name="site" value="<%= site.site %>" required class="w-full p-2 border rounded" />
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block font-semibold">Description</label>
+          <textarea name="description" rows="4" required
+            class="w-full p-2 border rounded"><%= site.description %></textarea>
+        </div>
+
+        <!-- Date + Date Type -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold">Date</label>
+            <input type="number" name="date" value="<%= site.date %>" required class="w-full p-2 border rounded" />
+          </div>
+          <div>
+            <label class="block font-semibold">Date Type</label>
+            <input type="text" name="dateType" value="<%= site.dateType %>" required
+              class="w-full p-2 border rounded" />
+          </div>
+        </div>
+
+        <!-- Current Image & Upload -->
+        <div>
+          <label class="block font-semibold">Current Image</label><br>
+          <% if (site.image) { %>
+            <img src="<%= site.image %>" alt="Site Image" class="w-32 h-32 rounded-md mb-2" />
+            <% } else { %>
+              <p class="text-sm text-gray-500 italic">No image available</p>
+              <% } %>
+                <input type="file" name="image" accept="image/*" class="w-full" />
+                <p class="text-sm text-gray-500 italic">Leave blank to keep current image</p>
+                <input type="hidden" name="currentImage" value="<%= site.image %>" />
+        </div>
+
+        <!-- Location -->
+        <div>
+          <label class="block font-semibold">Location</label>
+          <input type="text" name="location" value="<%= site.location %>" required class="w-full p-2 border rounded" />
+        </div>
+
+        <!-- Latitude & Longitude -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold">Latitude</label>
+            <input type="number" step="any" name="latitude" value="<%= site.latitude %>" required
+              class="w-full p-2 border rounded" />
+          </div>
+          <div>
+            <label class="block font-semibold">Longitude</label>
+            <input type="number" step="any" name="longitude" value="<%= site.longitude %>" required
+              class="w-full p-2 border rounded" />
+          </div>
+        </div>
+
+        <!-- Designated Year -->
+        <div>
+          <label class="block font-semibold">Designated Year</label>
+          <input type="number" name="designated" value="<%= site.designated %>" required
+            class="w-full p-2 border rounded" />
+        </div>
+
+        <!-- Province / Territory Dropdown -->
+        <div>
+          <label class="block font-semibold">Province / Territory</label>
+          <select name="provinceOrTerritoryCode" required class="w-full p-2 border rounded">
+            <% provinces.forEach(p=> { %>
+              <option value="<%= p.code %>" <%=p.code===site.provinceOrTerritoryCode ? 'selected' : '' %>>
+                <%= p.name %>
+              </option>
+              <% }) %>
+          </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex justify-between items-center pt-4">
+          <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+            Save Changes
+          </button>
+
+          <a href="/deleteSite/<%= site.siteId %>"
+            class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 text-sm">
+            Delete This Site
+          </a>
+        </div>
+      </form>
+    </div>
+</body>
+
+</html>

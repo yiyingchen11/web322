@@ -13,7 +13,9 @@
   <%- include('partials/navbar', { page: '/sites' }) %>
 
     <div class="max-w-6xl mx-auto bg-white shadow-md rounded-lg p-6 mt-10">
-      <h2 class="text-2xl font-bold text-center mb-4">Historic Sites Collection</h2>
+      <h2 class="text-2xl font-bold text-center mb-4">
+        Historic Sites Collection (<%= sites.length %>)
+      </h2>
 
       <!-- Filtering Options -->
       <div class="flex justify-center space-x-4 mb-6">
@@ -24,14 +26,13 @@
         <a href="/sites?region=Prairie Provinces"
           class="px-4 py-2 bg-violet-500 text-white rounded-md hover:bg-violet-600">Prairie Provinces</a>
         <a href="/sites?region=West Coast"
-          class="px-4 py-2 bg-violet-500 text-white rounded-md hover:bg-violet-600">West
-          Coast</a>
+          class="px-4 py-2 bg-violet-500 text-white rounded-md hover:bg-violet-600">West Coast</a>
       </div>
 
-      <!-- Site List-->
+      <!-- Site List -->
       <table class="w-full border-collapse border border-gray-300">
         <thead>
-          <tr class="bg-gray-200">
+          <tr class="bg-gray-200 text-center">
             <th class="border border-gray-300 p-2">Image</th>
             <th class="border border-gray-300 p-2">Site Name</th>
             <th class="border border-gray-300 p-2">Date (Type)</th>
@@ -56,18 +57,17 @@
                 </td>
                 <td class="border border-gray-300 p-2">
                   <%= site.location %>,
-                    <a href="/sites?provinceOrTerritory=<%= site.provinceOrTerritoryObj.name %>"
-                      class="text-violet-600 underline">
-                      <%= site.provinceOrTerritoryObj.name %>
+                    <a href="/sites?province=<%= site.ProvinceOrTerritory.name %>" class="text-violet-600 underline">
+                      <%= site.ProvinceOrTerritory.name %>
                     </a>
                 </td>
                 <td class="border border-gray-300 p-2">
-                  <a href="/sites?region=<%= site.provinceOrTerritoryObj.region %>" class="btn btn-link">
-                    <%= site.provinceOrTerritoryObj.region %>
+                  <a href="/sites?region=<%= site.ProvinceOrTerritory.region %>" class="text-violet-600 underline">
+                    <%= site.ProvinceOrTerritory.region %>
                   </a>
                 </td>
                 <td class="border border-gray-300 p-2">
-                  <a href="/item/<%= site.siteId %>"
+                  <a href="/site/<%= site.siteId %>"
                     class="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600">
                     Details
                   </a>
